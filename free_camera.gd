@@ -187,9 +187,15 @@ func _process(delta: float) -> void:
 
 		# Face camera
 		if rings_face_camera:
-			var cam: Camera3D = _find_camera()
-			if cam != null:
-				_rings.look_at(cam.global_position, Vector3.UP)
+			var cam := _find_camera()
+			if cam:
+				var target := cam.global_position
+
+				# If camera and rings overlap, fallback to camera forward direction.
+				if target.is_equal_approx(_rings.global_position):
+					target = _rings.global_position + (-cam.global_transform.basis.z)
+
+				_rings.look_at(target, Vector3.UP)
 
 		# Breathing scale (do AFTER look_at, because look_at can stomp scale)
 		var t := float(Time.get_ticks_msec()) * 0.001
@@ -963,9 +969,9 @@ func _find_camera() -> Camera3D:
 		return cam
 
 	# fallback: a Camera3D node named "Camera3D" under this projectile
-	var n: Node = find_child("Camera3D", true, false)
-	if n != null and n is Camera3D:
-		return n as Camera3D
+	var c := find_child("Camera3D", true, false) as Camera3D
+	if c and c.current:
+		return c
 
 	return null
 
