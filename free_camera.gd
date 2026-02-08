@@ -1,6 +1,5 @@
 @tool
 extends Node3D
-class_name VFXProjectile
 
 # Scene expectations (auto-created if missing):
 # - Head   : MeshInstance3D
@@ -20,6 +19,7 @@ class_name VFXProjectile
 @export var randomize_seed_on_ready: bool = true
 @export var auto_setup_world_environment: bool = true
 @export var clear_camera_environment_override: bool = true
+@export var preview_camera_in_editor: bool = true
 
 @export var preset: Resource # should be VFXPreset
 
@@ -134,6 +134,7 @@ var _white_tex: Texture2D
 var _rings_scale_base: float = 1.0
 var _rings_phase: float = 0.0
 var _environment_debug_printed: bool = false
+var _preview_cam: Camera3D
 
 # -----------------------------
 # Color schemes
@@ -164,6 +165,7 @@ func _ready() -> void:
 	_seed_value = preview_seed
 
 	_ensure_nodes()
+	_configure_preview_camera()
 	if auto_setup_world_environment:
 		_ensure_environment_glow()
 
@@ -176,6 +178,13 @@ func _ready() -> void:
 		randomize_seed()
 	elif auto_apply_on_ready:
 		apply_seed(_seed_value)
+
+func _configure_preview_camera() -> void:
+	_preview_cam = find_child("Camera3D", true, false) as Camera3D
+	if _preview_cam == null:
+		return
+
+	_preview_cam.current = Engine.is_editor_hint() and preview_camera_in_editor
 
 func _process(delta: float) -> void:
 	if _rings != null and rings_enabled:
@@ -968,10 +977,11 @@ func _find_camera() -> Camera3D:
 	if cam != null:
 		return cam
 
-	# fallback: a Camera3D node named "Camera3D" under this projectile
-	var c := find_child("Camera3D", true, false) as Camera3D
-	if c and c.current:
-		return c
+	# fallback: use local preview camera only in editor workflows
+	if Engine.is_editor_hint():
+		var c := find_child("Camera3D", true, false) as Camera3D
+		if c and c.current:
+			return c
 
 	return null
 
