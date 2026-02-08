@@ -12,6 +12,7 @@ extends Camera3D
 
 @export var enable_fly_vertical: bool = true
 @export var toggle_mouse_key: Key = KEY_ESCAPE
+@export var make_current_on_ready: bool = true
 
 var _yaw: float = 0.0
 var _pitch: float = 0.0
@@ -20,6 +21,8 @@ var _vel: Vector3 = Vector3.ZERO
 func _ready() -> void:
 	_yaw = rotation.y
 	_pitch = rotation.x
+	if make_current_on_ready:
+		make_current()
 	if capture_mouse_on_ready:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
@@ -63,7 +66,11 @@ func _physics_process(delta: float) -> void:
 		wish = wish.normalized()
 
 	var spd := move_speed
-	if Input.is_action_pressed("move_sprint") or Input.is_key_pressed(KEY_SHIFT):
+	var sprint_pressed := Input.is_key_pressed(KEY_SHIFT)
+	if InputMap.has_action(&"move_sprint"):
+		sprint_pressed = sprint_pressed or Input.is_action_pressed(&"move_sprint")
+
+	if sprint_pressed:
 		spd *= sprint_multiplier
 
 	var target_vel := wish * spd
