@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgprxmxal037o"]
+
+[ext_resource type="ArrayMesh" uid="uid://dol5vtkcruooj" path="res://Mesh/Enemy-Meshs/Crystal Beast/CB.res" id="1_s7gno"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_s7gno")
