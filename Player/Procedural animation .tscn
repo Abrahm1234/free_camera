@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://dgprxmxal037o"]
+[gd_scene load_steps=4 format=3 uid="uid://dgprxmxal037o"]
 
 [ext_resource type="Script" path="res://Player Scripts/procedural_animator.gd" id="1_55rpo"]
+[ext_resource type="Script" path="res://Player Scripts/free_camera/free_camera.gd" id="2_ukq4j"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_8jfp3"]
+radius = 0.5
 
 [node name="CharacterBody3D" type="CharacterBody3D"]
 
@@ -14,9 +18,11 @@ look_target_path = NodePath("../AimTarget")
 rig_root_path = NodePath("../VisualRoot/RigInstance")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_8jfp3")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 1.65662, 4.83672)
+script = ExtResource("2_ukq4j")
 
 [node name="AimTarget" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

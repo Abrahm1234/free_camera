@@ -25,7 +25,7 @@ var _lean: float = 0.0
 func _ready() -> void:
 	_skeleton = _resolve_skeleton()
 	if _skeleton == null:
-		push_warning("ProceduralAnimator: Skeleton3D not found. Instance your rigged GLB under rig_root_path and assign skeleton_path to its Skeleton3D.")
+		push_warning("ProceduralAnimator: Skeleton3D not found. RigInstance appears empty. Instance a rigged GLB under rig_root_path and/or assign skeleton_path to its Skeleton3D.")
 		return
 
 	if print_bones_on_ready:
