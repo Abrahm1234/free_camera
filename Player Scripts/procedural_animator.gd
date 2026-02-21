@@ -131,15 +131,15 @@ func _apply_lean(delta: float) -> void:
 	if body == null:
 		return
 
-	var world_velocity := body.velocity
-	var local_velocity := body.global_transform.basis.inverse() * world_velocity
-	var speed := max(world_velocity.length(), 0.01)
-	var normalized_sideways := clamp(-local_velocity.x / speed, -1.0, 1.0)
-	var target_lean := normalized_sideways * deg_to_rad(lean_max_deg)
+	var world_velocity: Vector3 = body.velocity
+	var local_velocity: Vector3 = body.global_transform.basis.inverse() * world_velocity
+	var speed: float = maxf(world_velocity.length(), 0.01)
+	var normalized_sideways: float = clampf(-local_velocity.x / speed, -1.0, 1.0)
+	var target_lean: float = normalized_sideways * deg_to_rad(lean_max_deg)
 
 	_lean = lerpf(_lean, target_lean, 1.0 - exp(-lean_smooth * delta))
 
-	var spine_rest := _skeleton.get_bone_global_rest(_spine_idx)
-	var spine_pose := spine_rest
+	var spine_rest: Transform3D = _skeleton.get_bone_global_rest(_spine_idx)
+	var spine_pose: Transform3D = spine_rest
 	spine_pose.basis = spine_pose.basis * Basis(Vector3.FORWARD, _lean)
 	_skeleton.set_bone_global_pose_override(_spine_idx, spine_pose, 0.35, true)
