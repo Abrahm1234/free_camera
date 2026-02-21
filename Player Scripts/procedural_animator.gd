@@ -2,6 +2,7 @@ extends Node
 
 @export var skeleton_path: NodePath
 @export var look_target_path: NodePath
+@export var rig_root_path: NodePath = NodePath("../VisualRoot/RigInstance")
 
 @export var head_bone_name: StringName = &"Head"
 @export var spine_bone_name: StringName = &"Spine"
@@ -24,7 +25,7 @@ var _lean: float = 0.0
 func _ready() -> void:
 	_skeleton = _resolve_skeleton()
 	if _skeleton == null:
-		push_warning("ProceduralAnimator: Skeleton3D not found. Assign skeleton_path to the Skeleton3D under your rigged GLB instance.")
+		push_warning("ProceduralAnimator: Skeleton3D not found. Instance your rigged GLB under rig_root_path and assign skeleton_path to its Skeleton3D.")
 		return
 
 	if print_bones_on_ready:
@@ -51,7 +52,23 @@ func _resolve_skeleton() -> Skeleton3D:
 	if by_path != null:
 		return by_path
 
-	return find_child("*", true, false) as Skeleton3D
+	var rig_root := get_node_or_null(rig_root_path)
+	if rig_root == null:
+		rig_root = self
+
+	return _find_skeleton_recursive(rig_root)
+
+
+func _find_skeleton_recursive(node: Node) -> Skeleton3D:
+	if node is Skeleton3D:
+		return node as Skeleton3D
+
+	for child in node.get_children():
+		var found := _find_skeleton_recursive(child)
+		if found != null:
+			return found
+
+	return null
 
 
 func _warn_missing_bones() -> void:
