@@ -12,6 +12,7 @@ extends Node
 @export var breathe_speed: float = 1.4
 @export var lean_max_deg: float = 12.0
 @export var lean_smooth: float = 10.0
+@export var print_bones_on_ready: bool = false
 
 var _skeleton: Skeleton3D
 var _head_idx: int = -1
@@ -21,14 +22,18 @@ var _lean: float = 0.0
 
 
 func _ready() -> void:
-	_skeleton = get_node_or_null(skeleton_path) as Skeleton3D
+	_skeleton = _resolve_skeleton()
 	if _skeleton == null:
-		push_warning("ProceduralAnimator: Skeleton3D not found. Assign skeleton_path to a rigged character skeleton.")
+		push_warning("ProceduralAnimator: Skeleton3D not found. Assign skeleton_path to the Skeleton3D under your rigged GLB instance.")
 		return
+
+	if print_bones_on_ready:
+		_print_bone_list()
 
 	_head_idx = _skeleton.find_bone(head_bone_name)
 	_spine_idx = _skeleton.find_bone(spine_bone_name)
 	_chest_idx = _skeleton.find_bone(chest_bone_name)
+	_warn_missing_bones()
 
 
 func _process(delta: float) -> void:
@@ -39,6 +44,28 @@ func _process(delta: float) -> void:
 	_apply_breathing(time_seconds)
 	_apply_look_at()
 	_apply_lean(delta)
+
+
+func _resolve_skeleton() -> Skeleton3D:
+	var by_path := get_node_or_null(skeleton_path) as Skeleton3D
+	if by_path != null:
+		return by_path
+
+	return find_child("*", true, false) as Skeleton3D
+
+
+func _warn_missing_bones() -> void:
+	if _head_idx == -1:
+		push_warning("ProceduralAnimator: head bone not found: %s" % head_bone_name)
+	if _spine_idx == -1:
+		push_warning("ProceduralAnimator: spine bone not found: %s" % spine_bone_name)
+	if _chest_idx == -1:
+		push_warning("ProceduralAnimator: chest bone not found: %s" % chest_bone_name)
+
+
+func _print_bone_list() -> void:
+	for i in range(_skeleton.get_bone_count()):
+		print("ProceduralAnimator bone ", i, ": ", _skeleton.get_bone_name(i))
 
 
 func _apply_breathing(time_seconds: float) -> void:
@@ -65,7 +92,7 @@ func _apply_look_at() -> void:
 	if to_target.length_squared() < 0.000001:
 		return
 
-	var look_basis := Basis.looking_at(to_target.normalized(), Vector3.UP)
+	var look_basis := Basis().looking_at(to_target.normalized(), Vector3.UP)
 	var head_pose := head_rest
 	head_pose.basis = look_basis
 	_skeleton.set_bone_global_pose_override(_head_idx, head_pose, look_weight, true)
